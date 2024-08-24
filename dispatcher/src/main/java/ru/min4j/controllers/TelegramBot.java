@@ -13,21 +13,32 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.meta.generics.TelegramClient;
 
+import javax.annotation.PostConstruct;
+
 
 @Controller
 @Log4j
 public class TelegramBot implements SpringLongPollingBot, LongPollingSingleThreadUpdateConsumer {
-    @Value("${bot.token}")
-    private String botName = "7524875922:AAG37K5QK3eJv1ISorvcc0JEEYL1Pn6454s";
-    private final TelegramClient telegramClient;
 
-    public TelegramBot() {
-        telegramClient = new OkHttpTelegramClient(getBotToken());
+    private final TelegramClient telegramClient;
+    private final UpdateController updateController;
+    private final String botToken;
+
+    public TelegramBot(UpdateController updateController,
+                       @Value("${bot.token}") String botToken) {
+        this.botToken = botToken;
+        this.updateController = updateController;
+        this.telegramClient = new OkHttpTelegramClient(getBotToken());
+    }
+
+    @PostConstruct
+    public void init() {
+        updateController.registerBot(this);
     }
 
     @Override
     public String getBotToken() {
-        return botName;
+        return botToken;
     }
 
     @Override
@@ -37,20 +48,14 @@ public class TelegramBot implements SpringLongPollingBot, LongPollingSingleThrea
 
     @Override
     public void consume(Update update) {
-        if (update.hasMessage() && update.getMessage().hasText()) {
-            var message = update.getMessage().getText();
-            var userId = update.getMessage().getFrom().getUserName();
-            var chatId = update.getMessage().getChatId();
-            SendMessage sendMessage = SendMessage
-                    .builder()
-                    .text("Message: " + message + "\nUsername: " + userId)
-                    .chatId(chatId)
-                    .build();
-            try {
-                telegramClient.execute(sendMessage);
-            } catch (TelegramApiException e) {
-                e.getMessage();
-            }
+        updateController.processUpdate(update);
+    }
+
+    public void sendAnswerMessage(SendMessage sendMessage) {
+        try {
+            telegramClient.execute(sendMessage);
+        } catch (TelegramApiException e) {
+            e.getMessage();
         }
     }
 }
