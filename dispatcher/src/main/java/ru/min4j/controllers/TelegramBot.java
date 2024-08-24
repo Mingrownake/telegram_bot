@@ -22,13 +22,13 @@ public class TelegramBot implements SpringLongPollingBot, LongPollingSingleThrea
 
     private final TelegramClient telegramClient;
     private final UpdateController updateController;
-    private final String botToken;
+    @Value("${bot.token}")
+    private String botToken;
 
     public TelegramBot(UpdateController updateController,
-                       @Value("${bot.token}") String botToken) {
-        this.botToken = botToken;
+                       TelegramClient telegramClient) {
         this.updateController = updateController;
-        this.telegramClient = new OkHttpTelegramClient(getBotToken());
+        this.telegramClient = telegramClient;
     }
 
     @PostConstruct
