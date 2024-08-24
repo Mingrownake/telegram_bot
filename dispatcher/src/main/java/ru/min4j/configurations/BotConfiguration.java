@@ -1,4 +1,4 @@
-package ru.min4j.Config;
+package ru.min4j.configurations;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
