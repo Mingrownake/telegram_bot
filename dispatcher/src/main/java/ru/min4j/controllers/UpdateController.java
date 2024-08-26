@@ -7,6 +7,8 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 import ru.min4j.services.UpdateProducer;
 import ru.min4j.utils.MessageUtils;
 
+import static ru.min4j.model.RabbitQueue.TEXT_MESSAGE_UPDATE;
+
 @Controller
 @Log4j
 public class UpdateController {
@@ -48,7 +50,7 @@ public class UpdateController {
     }
 
     private void processTextMessage(Update update) {
-        updateProducer.produce("TEXT_MESSAGE_UPDATE", update);
+        updateProducer.produce(TEXT_MESSAGE_UPDATE, update);
     }
 
     private void processDocumentMessage(Update update) {
